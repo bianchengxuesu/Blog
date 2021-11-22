@@ -1,0 +1,7 @@
+$.get("url",{parameter},function (data) {
+
+    },'json');
+
+$.post("url",{parameter},function (data) {
+
+    },'json');

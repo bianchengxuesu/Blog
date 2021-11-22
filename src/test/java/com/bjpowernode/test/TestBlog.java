@@ -1,12 +1,17 @@
 package com.bjpowernode.test;
 
 import com.bjpowernode.blog.back.bean.Article;
+import com.bjpowernode.blog.back.bean.User;
 import com.bjpowernode.blog.back.mapper.ArticleMapper;
+import com.bjpowernode.blog.back.mapper.UserMapper;
+import com.bjpowernode.blog.base.exception.BlogEnum;
+import com.bjpowernode.blog.base.exception.BlogException;
 import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.persistence.Table;
 import java.util.List;
 
 public class TestBlog {
@@ -18,6 +23,9 @@ public class TestBlog {
     private ArticleMapper articleMapper =
             (ArticleMapper) beanFactory.getBean("articleMapper");
 
+    private UserMapper userMapper =
+            (UserMapper) beanFactory.getBean("userMapper");
+
 
     //测试添加
     @Test
@@ -26,11 +34,18 @@ public class TestBlog {
         //insertSelective();
         //如果数据中有null，null的列不参与插入操作
         //如果用insert(),null值的列也会列在生成的sql语句中
-        Article article = new Article();
-        article.setDigest("文章摘要71");
-        article.setContent("文章内容71");
+//        Article article = new Article();
+//        article.setDigest("文章摘要71");
+//        article.setContent("文章内容71");
 
-        articleMapper.insertSelective(article);
+        User user = new User();
+        user.setUid("4");
+        user.setNickname("测试lombok");
+        user.setUsername("测试lombok的用户");
+        user.setPassword("123");
+
+                userMapper.insertSelective(user);
+
 
     }
 
@@ -96,5 +111,26 @@ public class TestBlog {
 
         System.out.println(articles);
     }
+
+    //测试自定义异常
+    @Test
+    public void test05(){
+
+        int a = 0;
+
+        try {
+
+            if (a == 0){
+
+                throw new BlogException(BlogEnum.USER_LOGIN_CODE);
+
+            }
+
+        }catch (BlogException e){
+            System.out.println(e.getMessage());
+        }
+
+    }
+
 
 }

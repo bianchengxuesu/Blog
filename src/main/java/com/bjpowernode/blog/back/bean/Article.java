@@ -10,12 +10,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Data
-@Getter
-@Setter
 @Table(name = "t_article")
 @NameStyle(Style.normal)
 public class Article {
 
+    @Id
     private String aid;//主键
     private String title;//标题
     private String digest;//文章摘要
