@@ -12,6 +12,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.persistence.Table;
+import java.io.File;
 import java.util.List;
 
 public class TestBlog {
@@ -130,6 +131,11 @@ public class TestBlog {
             System.out.println(e.getMessage());
         }
 
+    }
+
+    @Test
+    public void testSepe(){
+        System.out.println(File.separator);
     }
 
 

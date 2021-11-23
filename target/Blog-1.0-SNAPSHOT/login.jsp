@@ -32,7 +32,7 @@
             <div class='icon'>
                 <img alt="" src='/Blog/images/lock_icon_copy.png'>
             </div>
-            <input name="pwd" id="password" class="passwordNumder" placeholder='密码' maxlength="16" type='text' autocomplete="off">
+            <input name="pwd" id="password" class="passwordNumder" placeholder='密码' maxlength="16" type='password' autocomplete="off">
             <div class='validation'>
                 <img alt="" src='/Blog/images/tick.png'>
             </div>

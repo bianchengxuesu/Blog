@@ -22,9 +22,9 @@ function updateUser(){
         if(data.ok) {
             layer.alert(data.mess, {icon: 6});
             setTimeout(function () {
-                //修改成功，关闭模态窗口
+                //修改成功，跳转至登录页面
                 //setTimeout:隔多长时间执行指定代码
-                $("#seeUserInfo").modal("hidden");
+                location.href = "Blog/login.jsp";
             },1000);
         }
 

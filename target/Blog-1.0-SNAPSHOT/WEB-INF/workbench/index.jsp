@@ -301,7 +301,7 @@
 
     });
 
-    $('#oldPwd').blur(function () {
+    $('#secondPwd').blur(function () {
        //判断两次输入的密码是否一致
        var val1 = $("#firstPwd").val();
        var val2 = $("#secondPwd").val();

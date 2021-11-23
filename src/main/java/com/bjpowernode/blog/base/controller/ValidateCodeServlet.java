@@ -19,6 +19,7 @@ public class ValidateCodeServlet {
         //把正确的验证码保存在session中
         String code = captcha.getCode();
         session.setAttribute("code",code);
+
         System.out.println("code="+code);
         //返回验证码字符串
         return code;
