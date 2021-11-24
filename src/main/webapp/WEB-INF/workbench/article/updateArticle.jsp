@@ -54,7 +54,7 @@
       <div class="container-fluid">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false"> <span class="sr-only">切换导航</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
-            <a class="navbar-brand" href="/">AndyHu</a> </div>
+            <img src="/Blog/images/logo.png" style="width: 50px;height: 64px;position: relative;left: 80px;"> </div>
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav navbar-right">
             <li><a href="">消息 <span class="badge">1</span></a></li>
@@ -121,19 +121,17 @@
     </aside>
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-lg-10 col-md-offset-2 main" id="main">
       <div class="row">
-        <form method="post" enctype="multipart/form-data"
+        <form
+              method="post" enctype="multipart/form-data"
               class="add-article-form">
-            <input type="hidden" id="logo" />
+            <input type="hidden" id="aid"  />
+            <input type="hidden" id="logo"  />
           <div class="col-md-12">
-            <h1 class="page-header">撰写新文章</h1>
+            <h1 class="page-header">编辑博文</h1>
               <div class="form-group">
                   <select name="cid" id="categories" class="form-control">
                   </select>
                   <label id="tags" style="margin-top: 10px">
-                      <input type="checkbox" value="户外运动" />户外运动&nbsp;&nbsp;&nbsp;
-                      <input type="checkbox" value="赛艇"/>赛艇&nbsp;&nbsp;&nbsp;
-                      <input type="checkbox" value="羽毛球"/>羽毛球&nbsp;&nbsp;&nbsp;
-                      <input type="checkbox" value="垒球" />垒球&nbsp;&nbsp;&nbsp;
                   </label>
               </div>
             <div class="form-group">
@@ -143,22 +141,23 @@
               <div class="form-group">
                   <textarea id="digest" class="form-control" rows="3" placeholder="在此处输入文章摘要"></textarea>
               </div>
-              <div class="form-group">
+              <div>
                   <a href="javascript:;" class="a-upload">
                       <input type="file" name="img" id="img" />上传文章LOGO
                   </a>
               </div>
               <div id="test-editor">
-                <textarea name="content" id="content" style="display:none;">
-
+                <textarea id="content" style="display:none;">
                 </textarea>
               </div>
               <div class="add-article-box">
                   <h2 class="add-article-box-title"><span>发布</span></h2>
                   <div class="add-article-box-content">
-                      <p><label>状态：</label><span id="state" class="article-status-display">未发布</span></p>
-                      <p><label>公开度：</label><input type="radio" name="isOpen" value="1" checked />公开 <input type="radio" name="isOpen" value="0" />私密</p>
-                      <p><label>发布于：</label><span class="article-time-display"><input style="border: none;" type="datetime" name="time" id="punishTime" /></span></p>
+                      <p><label>状态：</label><span class="article-status-display">已发布</span></p>
+                      <p><label>公开度：</label><input type="radio" id="open" name="isOpen" value="1"   />公开
+                          <input type="radio" name="isOpen" id="private" value="0"  />私密
+                      </p>
+                      <p><label>发布于：</label><span class="article-time-display" id="create_time"></span></p>
                   </div>
                   <div class="add-article-box-footer">
                       <button class="btn btn-primary" type="button" onclick="punish()">发布</button>
@@ -289,144 +288,88 @@
   </div>
 </div>
 <script src="/Blog/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
-
+<script src="/Blog/js/admin-scripts.js"></script>
 <%--Editormd--%>
 <link rel="stylesheet" href="/Blog/editormd/css/editormd.css" />
 <script src="/Blog/js/jquery/jquery-2.1.1.min.js"></script>
-<script src="/Blog/editormd/editormd.js" charset="utf-8"></script>
-
-<script src="/Blog/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
-<script src="/Blog/js/admin-scripts.js"></script>
+<script src="/Blog/editormd/editormd.js"></script>
 <script src="/Blog/js/layer-3.5.1/layer.js" type="text/javascript"></script>
 
 
-
-
-<%--异步上传文件js--%>
-<script src="/Blog/js/ajaxfileupload.js"></script>
-
 <script>
-  var editor;
-  $(function() {
-    editor = editormd("test-editor", {
-      width  : "100%",
-      height : "500px",
-      path   : "/Blog/editormd/lib/",//第三方依赖库
-      saveHTMLToTextarea : true,//获取用户编辑的内容，将其放入到textarea中
-      emoji: true,//emoji表情，默认关闭
-      syncScrolling : "single",
-      /*上传文件配置*/
-      imageUpload : true,//开启上传文件功能
-      imageFormats : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],//上传图片格式
-      imageUploadURL : "/Blog/editorUpload",//后端上传图片服务地址
+    var editor;
+    $(function() {
+        editor = editormd("test-editor", {
+            width  : "100%",
+            height : "500px",
+            path   : "/Blog/editormd/lib/",//第三方依赖库
+            saveHTMLToTextarea : true,//获取用户编辑的内容，将其放入到textarea中
+            emoji: true,//emoji表情，默认关闭
+            syncScrolling : "single",
+            /*上传文件配置*/
+            imageUpload : true,//开启上传文件功能
+            imageFormats : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],//上传图片格式
+            imageUploadURL : "/Blog/editorUpload",//后端上传图片服务地址
+        });
     });
-  });
+    //异步查询所有栏目，把返回的json串拼接到下拉框中
+    $.get("/Blog/article/queryCategory",function (data) {
+        //List<Category>
+        for(var i = 0; i < data.length; i++){
+            $('#categories').append("<option value="+data[i].cid+">"+data[i].cname+"</option>");
+        }
 
-  //上传文章logo
-  //异步上传文件
-  $('#img').change(function () {
-    $.ajaxFileUpload({
-              url: '/Blog/fileUpload', //用于文件上传的服务器端请求地址
-              fileElementId: 'img', //文件上传域的ID
-              dataType: 'json', //返回值类型 一般设置为json
-              success: function (data, status) {
-
-                if(data.success == 1){
-                  alert(data.message);
-                  //把文章logo的url地址设置到隐藏域中
-                  $('#logo').val(data.url);
-                }
-
-              },
-
-    });
-    return false;
-  });
-
-  //查询种类，放到下拉框里
-  $.get("/Blog/article/queryCategory",function (data) {
-    //List<Category>
-    for(var i = 0; i < data.length; i++){
-      $('#categories').append("<option value="+data[i].cid+">"+data[i].cname+"</option>");
-    }
-  },'json');
-
-  //选中种类栏，加载对应种类的标签
-  $('#categories').change(function () {
-    $.get("/Blog/article/queryTags",{'cid':$(this).val()},function (data) {
-      //List<Tag>
-      //清空内容
-      $('#tags').html("");
-      for(var i = 0; i < data.length; i++){
-        $('#tags').append("<input type='checkbox' value="+data[i].tname+" />"+data[i].tname+"&nbsp;&nbsp;&nbsp;");
-      }
     },'json');
-  });
 
-  //发布文章
-  function punish() {
-    //tags用于保存标签
-    var tags = [];
-    //获取栏目标签
-    $('input[type=checkbox]:checked').each(function () {
-      tags.push($(this).val());
-    });
-
-    //join方法:把数组中的内容默认以,号的分割符把数组内容拼接成字符串
-    var tagNames = tags.join();
-
-    $.post("/Blog/article/saveOrUpdate",{
-      'cid' : $('#categories').val(),
-      'tagNames' : tagNames,
-      'title' : $('#title').val(),
-      'digest' : $('#digest').val(),  //摘要
-      'logo' : $('#logo').val(),
-      'content' : $('#content').val(),
-      'isOpen' : $('input[type=radio]:checked').val() //1公开，0不公开
-    },function (data) {
-      //返回resultVo
-
-      if(data.ok){
-
-        layer.alert(data.mess, {icon:6});
-        //发布成功，修改状态信息和发布时间
-        $('#state').text("已发布");
-        $('#punishTime').val(data.t.create_time);
-        // //跳转到文章列表页面
-        location.href = "/Blog/toView/workbench/article/index";
-      }
-    },'json');
-  }
-
-</script>
-
-  <%--var editor;
-      $(function() {
-          editor = editormd("test-editor", {
-              width  : "100%",
-              height : "500px",
-              path   : "/Blog/editormd/lib/",//第三方依赖库
-              saveHTMLToTextarea : true,//获取用户编辑的内容，将其放入到textarea中
-              emoji: true,//emoji表情，默认关闭
-              syncScrolling : "single",
-              /*上传文件配置*/
-              imageUpload : true,//开启上传文件功能
-              imageFormats : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],//上传图片格式
-              imageUploadURL : "/Blog/editorUpload",//后端上传图片服务地址
-          });
-      });
 
     //选中栏目后加载栏目下对应的种类
-    $('#category').change(function () {
+    $('#categories').change(function () {
         //获取选中的栏目，把主键发送到后台查询
-        $.get("/Blog/article/queryByCategory",
+        $.get("/Blog/article/queryTags",
             {'cid':$(this).val()},function (data) {
                 $('#tags').html("");
+                for(var i = 0 ; i < data.length; i++){
+                    $('#tags').append("<input name='tid' type=\"checkbox\" value="+data[i].tname+">"+data[i].tname+" &nbsp;&nbsp;");
+                }
+            },'json');
+    });
+
+    //发送异步请求，查询当前文章信息
+    $.get('/Blog/article/queryById',{'id':'${id}'},function (data) {
+        //让栏目选中当前文章对应的栏目
+        $('#categories').children('option').each(function () {
+            if($(this).val() == data.cid){
+               $(this).prop('selected',true);
+            }
+        });
+
+        //页面其他内容设置
+        //标题
+        $('#title').val(data.title);
+        //摘要
+        $('#digest').val(data.digest);
+
+        //把当前文章主键设置隐藏域中
+        $('#aid').val(data.aid);
+        //文章内容
+        $('#content').val(data.content);
+        //文章是否公开
+        if(data.isOpen == "1"){
+            $('#open').prop('checked',true);
+        }else{
+            $('#private').prop('checked',true);
+        }
+        //发布时间
+        $('#create_time').text(data.create_time);
+
+        //查询当前栏目下对应的标签
+        $.get("/Blog/article/queryTags",{'cid':data.cid},function (data) {
+            $('#tags').html("");
             for(var i = 0 ; i < data.length; i++){
                 $('#tags').append("<input name='tid' type=\"checkbox\" value="+data[i].tname+">"+data[i].tname+" &nbsp;&nbsp;");
             }
         },'json');
-    });
+    },'json');
 
     //上传文章logo
     //异步上传文件
@@ -448,26 +391,7 @@
         return false;
     });
 
-    //异步查询所有栏目，把返回的json串拼接到下拉框中
-    $.get("/Blog/article/queryCategory",function (data) {
-        //List<Category>
-        for(var i = 0; i < data.length; i++){
-            $('#categories').append("<option value="+data[i].cid+">"+data[i].cname+"</option>");
-        }
-    },'json');
-    //选中栏目，加载栏目下对应的标签
-    $('#categories').change(function () {
-        $.get("/Blog/article/queryTags",{'cid':$(this).val()},function (data) {
-            //List<Tag>
-            //清空内容
-            $('#tags').html("");
-            for(var i = 0; i < data.length; i++){
-                $('#tags').append("<input type='checkbox' value="+data[i].tname+" />"+data[i].tname+"&nbsp;&nbsp;&nbsp;");
-            }
-        },'json');
-    });
-
-    //发布文章
+    //修改文章
     function punish() {
         var tags = [];
         //获取栏目标签
@@ -477,26 +401,31 @@
         //join方法:把数组中的内容默认以,号的分割符把数组内容拼接成字符串
         var tagNames = tags.join();
 
-       $.post("/Blog/article/saveOrUpdate",{
-            'cid' : $('#categories:selected').val(),
+        $.post("/Blog/article/saveOrUpdate",{
+            'aid' : $('#aid').val(),
+            'cid' : $('#categories').val(),
             'tagNames' : tagNames,
             'title' : $('#title').val(),
             'digest' : $('#digest').val(),
-            'logo' : $('#logo').val(),
-            'content' : $('#content').val(),
+            'logo' : $('#img').val(),
+            'content' :  $('#content').val(),
             'isOpen' : $('input[type=radio]:checked').val()
         },function (data) {
             //返回resultVo
             if(data.ok){
                 layer.alert(data.mess, {icon:6});
-                //发布成功，修改状态信息和发布时间
-                $('#state').text("已发布");
-                $('#punishTime').val(data.t.create_time);
+                //文章是否公开
+                if(data.isOpen == "1"){
+                    $('#open').prop('checked',true);
+                }else{
+                    $('#private').prop('checked',true);
+                }
                 //跳转到文章列表页面
                 location.href = "/Blog/toView/workbench/article/index";
             }
         },'json');
-    }--%>
+    }
+</script>
 
 </body>
 </html>

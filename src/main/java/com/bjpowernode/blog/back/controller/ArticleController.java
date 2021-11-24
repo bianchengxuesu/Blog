@@ -1,6 +1,8 @@
 package com.bjpowernode.blog.back.controller;
 
 import com.bjpowernode.blog.back.bean.Article;
+import com.bjpowernode.blog.back.bean.Category;
+import com.bjpowernode.blog.back.bean.Tag;
 import com.bjpowernode.blog.back.bean.User;
 import com.bjpowernode.blog.back.service.ArticleService;
 import com.bjpowernode.blog.back.service.UserService;
@@ -65,5 +67,75 @@ public class ArticleController {
     }
 
 
+    //查询种类，如：运动、生活、编程等
+    @ResponseBody
+    @RequestMapping("/article/queryCategory")
+    public List<Category> queryCategory(){
+
+        List<Category> categories = articleService.queryCategory();
+
+        return categories;
+    }
+
+    //查询种类下对应的标签，如：运动下有户外运动、赛艇、羽毛球、垒球等
+    @ResponseBody
+    @RequestMapping("/article/queryTags")
+    public List<Tag> queryTags(String cid){
+
+        List<Tag> tags = articleService.queryTags(cid);
+
+        return tags;
+    }
+
+    //异步发布和更新文章
+    @ResponseBody
+    @RequestMapping("/article/saveOrUpdate")
+    public ResultVo saveOrUpdate(Article article,HttpSession session){
+
+        ResultVo resultVo = new ResultVo();
+
+        try {
+            //获取登录用户
+            User user = (User) session.getAttribute("user");
+            article.setUid(user.getUid());
+            article = articleService.saveOrUpdate(article);
+            resultVo.setOk(true);
+            resultVo.setT(article);
+            if (article.getAid() == null) {
+                resultVo.setMess("发布文章成功");
+            }else {
+                resultVo.setMess("修改文章成功");
+            }
+        }catch (Exception e){
+            resultVo.setMess(e.getMessage());
+        }
+
+        return resultVo;
+    }
+
+    //异步查询文章信息
+    @ResponseBody
+    @RequestMapping("/article/queryById")
+    public Article queryById(String id){
+        System.out.println(id);
+        Article article = articleService.queryById(id);
+        return article;
+    }
+
+    //异步删除文章信息
+    @ResponseBody
+    @RequestMapping("/article/deleteById")
+    public ResultVo deleteById(String id){
+        ResultVo resultVo = new ResultVo();
+        try {
+            articleService.deleteById(id);
+            resultVo.setOk(true);
+            resultVo.setMess("删除文章成功");
+        }catch (Exception e){
+            resultVo.setMess(e.getMessage());
+        }
+
+        return resultVo;
+    }
 
 }

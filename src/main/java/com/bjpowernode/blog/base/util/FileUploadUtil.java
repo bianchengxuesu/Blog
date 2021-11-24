@@ -34,7 +34,7 @@ public class FileUploadUtil {
         }
         //相同用户可能会上传相同的文件名的图片，防止文件重名
         //获取用户名
-        String fileName = img.getOriginalFilename();
+            String fileName = img.getOriginalFilename();
 
         //1223434324文件名.png/jpg
         fileName = System.currentTimeMillis() + fileName;
@@ -42,7 +42,7 @@ public class FileUploadUtil {
         //定义用于给Editormd返回的map数据
         Map<String,Object> map = new HashMap<>();
         //获取回调地址
-        String url = "http://localhost/blog/upload/" + DateTimeUtil.getDate()
+        String url = "http://localhost:8080/Blog/upload/" + DateTimeUtil.getDate()
                 +File.separator + user.getUsername() + File.separator + fileName;
         try {
             img.transferTo(new File(realPath + File.separator + fileName));

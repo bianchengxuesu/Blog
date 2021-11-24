@@ -2,11 +2,14 @@ package com.bjpowernode.blog.back.service.impl;
 
 import com.bjpowernode.blog.back.bean.Article;
 import com.bjpowernode.blog.back.bean.Category;
+import com.bjpowernode.blog.back.bean.Tag;
 import com.bjpowernode.blog.back.mapper.ArticleMapper;
 import com.bjpowernode.blog.back.mapper.CategoryMapper;
+import com.bjpowernode.blog.back.mapper.TagMapper;
 import com.bjpowernode.blog.back.service.ArticleService;
 import com.bjpowernode.blog.base.exception.BlogEnum;
 import com.bjpowernode.blog.base.exception.BlogException;
+import com.bjpowernode.blog.base.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -21,6 +24,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired
+    private TagMapper tagMapper;
 
 
     @Override
@@ -62,5 +68,74 @@ public class ArticleServiceImpl implements ArticleService {
 
         }
 
+    }
+
+    @Override
+    public List<Category> queryCategory() {
+
+        List<Category> list = categoryMapper.selectAll();
+
+        return list;
+
+    }
+
+    @Override
+    public List<Tag> queryTags(String cid) {
+        Tag tag = new Tag();
+        tag.setCid(cid);
+
+        return tagMapper.select(tag);
+    }
+
+    @Override
+    public Article saveOrUpdate(Article article) {
+
+        if (article.getAid() == null){
+            //aid为null，说明是添加
+            //点赞数开始为零
+            article.setThumbsUp("0");
+            //是否热门为零
+            article.setIs_hot("0");
+            //访问量为零
+            article.setVisit_count("0");
+            //发布时间
+            article.setCreate_time(DateTimeUtil.getSysTime());
+            //是否被评论
+            article.setIsCommented("0");
+
+            int count = articleMapper.insertSelective(article);
+            if (count == 0){
+                //发布失败
+                throw new BlogException(BlogEnum.ARTICLE_PUNISH);
+            }
+
+        }else {
+
+            article.setUpdate_time(DateTimeUtil.getSysTime());
+            int count = articleMapper.updateByPrimaryKeySelective(article);
+            if (count == 0){
+                //修改失败
+                throw new BlogException(BlogEnum.ARTICLE_UPDATE);
+            }
+
+        }
+
+        return article;
+    }
+
+    @Override
+    public Article queryById(String id) {
+
+        Article article = articleMapper.selectByPrimaryKey(id);
+
+        return article;
+    }
+
+    @Override
+    public void deleteById(String id) {
+        int count = articleMapper.deleteByPrimaryKey(id);
+        if (count == 0){
+            throw new BlogException(BlogEnum.ARTICLE_DELETE);
+        }
     }
 }

@@ -161,7 +161,7 @@
                       <p><label>发布于：</label><span class="article-time-display"><input style="border: none;" type="datetime" name="time" id="punishTime" /></span></p>
                   </div>
                   <div class="add-article-box-footer">
-                      <button class="btn btn-primary" type="submit" onclick="punish()">发布</button>
+                      <button class="btn btn-primary" type="button" onclick="punish()">发布</button>
                   </div>
               </div>
           </div>
@@ -295,8 +295,11 @@
 <script src="/Blog/js/jquery/jquery-2.1.1.min.js"></script>
 <script src="/Blog/editormd/editormd.js" charset="utf-8"></script>
 
+<script src="/Blog/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
 <script src="/Blog/js/admin-scripts.js"></script>
 <script src="/Blog/js/layer-3.5.1/layer.js" type="text/javascript"></script>
+
+
 
 
 <%--异步上传文件js--%>
@@ -319,6 +322,81 @@
     });
   });
 
+  //上传文章logo
+  //异步上传文件
+  $('#img').change(function () {
+    $.ajaxFileUpload({
+              url: '/Blog/fileUpload', //用于文件上传的服务器端请求地址
+              fileElementId: 'img', //文件上传域的ID
+              dataType: 'json', //返回值类型 一般设置为json
+              success: function (data, status) {
+
+                if(data.success == 1){
+                  alert(data.message);
+                  //把文章logo的url地址设置到隐藏域中
+                  $('#logo').val(data.url);
+                }
+
+              },
+
+    });
+    return false;
+  });
+
+  //查询种类，放到下拉框里
+  $.get("/Blog/article/queryCategory",function (data) {
+    //List<Category>
+    for(var i = 0; i < data.length; i++){
+      $('#categories').append("<option value="+data[i].cid+">"+data[i].cname+"</option>");
+    }
+  },'json');
+
+  //选中种类栏，加载对应种类的标签
+  $('#categories').change(function () {
+    $.get("/Blog/article/queryTags",{'cid':$(this).val()},function (data) {
+      //List<Tag>
+      //清空内容
+      $('#tags').html("");
+      for(var i = 0; i < data.length; i++){
+        $('#tags').append("<input type='checkbox' value="+data[i].tname+" />"+data[i].tname+"&nbsp;&nbsp;&nbsp;");
+      }
+    },'json');
+  });
+
+  //发布文章
+  function punish() {
+    //tags用于保存标签
+    var tags = [];
+    //获取栏目标签
+    $('input[type=checkbox]:checked').each(function () {
+      tags.push($(this).val());
+    });
+
+    //join方法:把数组中的内容默认以,号的分割符把数组内容拼接成字符串
+    var tagNames = tags.join();
+
+    $.post("/Blog/article/saveOrUpdate",{
+      'cid' : $('#categories').val(),
+      'tagNames' : tagNames,
+      'title' : $('#title').val(),
+      'digest' : $('#digest').val(),  //摘要
+      'logo' : $('#logo').val(),
+      'content' : $('#content').val(),
+      'isOpen' : $('input[type=radio]:checked').val() //1公开，0不公开
+    },function (data) {
+      //返回resultVo
+
+      if(data.ok){
+
+        layer.alert(data.mess, {icon:6});
+        //发布成功，修改状态信息和发布时间
+        $('#state').text("已发布");
+        $('#punishTime').val(data.t.create_time);
+        // //跳转到文章列表页面
+        location.href = "/Blog/toView/workbench/article/index";
+      }
+    },'json');
+  }
 
 </script>
 
